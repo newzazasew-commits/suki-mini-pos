@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Suki Mini POS เลือกเมนูสุกี้ เพิ่มลงตะกร้า และคำนวณยอดรวมได้ทันที">
+  <title>Suki Mini POS — รับออร์เดอร์</title>
+  <style>
+    :root { color-scheme: light; --ink: #243d35; --muted: #65736c; --line: #e5eae6; --accent: #c6472e; --soft: #fcf3ee; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fff; color: var(--ink); font-family: Tahoma, "Leelawadee UI", sans-serif; font-size: 16px; line-height: 1.65; }
+    button { font: inherit; cursor: pointer; touch-action: manipulation; }
+    button:focus-visible, a:focus-visible { outline: 3px solid #236bba; outline-offset: 5px; }
+    button { transition: background .15s, transform .15s; }
+    button:active { transform: translateY(1px); }
+    svg { display: block; }
+    .shell { width: min(1180px, calc(100% - 64px)); margin: 0 auto; }
+    .header { border-bottom: 1px solid var(--line); }
+    .header-inner { min-height: 100px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { display: flex; gap: 12px; align-items: center; }
+    .brand-icon { width: 46px; height: 46px; border-radius: 15px; background: var(--accent); color: white; display: grid; place-items: center; }
+    .brand-name { font-size: 23px; font-weight: 700; letter-spacing: -.8px; line-height: 1.2; }
+    .brand-name span { color: var(--accent); }
+    .brand-caption { color: var(--muted); font-size: 11px; letter-spacing: 1.6px; margin-top: 5px; }
+    .header-label { font-size: 13px; display: flex; align-items: center; gap: 8px; color: var(--muted); }
+    .status-dot { width: 7px; height: 7px; background: #528365; border-radius: 50%; }
+    main { padding-top: 48px; padding-bottom: 48px; }
+    .eyebrow { color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: 1.5px; margin: 0 0 10px; }
+    h1 { font-size: clamp(28px, 4vw, 38px); line-height: 1.4; letter-spacing: -1px; margin: 0 0 9px; }
+    .intro { color: var(--muted); margin: 0; font-size: 15px; }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 354px; gap: 36px; align-items: start; margin-top: 38px; }
+    .section-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    h2 { font-size: 19px; margin: 0; }
+    .menu-count { font-size: 13px; color: var(--muted); }
+    .products { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .product { border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: #fff; }
+    .product-art { height: 155px; display: grid; place-items: center; position: relative; background: #fcf3ee; }
+    .product-art.beef { background: #f6f2e9; }
+    .product-art.water { background: #edf5f4; }
+    .product-art svg { width: 128px; height: 112px; }
+    .product-number { position: absolute; left: 14px; top: 10px; color: #7b675d; font-size: 11px; letter-spacing: 1px; }
+    .product-info { padding: 20px 16px 16px; }
+    .category { color: var(--muted); margin: 0 0 3px; font-size: 12px; }
+    h3 { font-size: 20px; margin: 0; }
+    .price { margin: 11px 0 20px; font-size: 25px; font-weight: 700; letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
+    .price span { font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 4px; }
+    .add-button { border: 0; background: var(--accent); color: #fff; width: 100%; min-height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 700; }
+    .add-button:hover { background: #a93823; }
+    .plus { font-size: 23px; font-weight: 400; line-height: 1; }
+    .menu-hint { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin: 20px 0 0; }
+    .menu-hint svg { flex-shrink: 0; }
+    .cart { border: 1px solid var(--line); border-top: 4px solid var(--ink); border-radius: 18px; overflow: hidden; }
+    .cart-heading { padding: 23px 23px 19px; border-bottom: 1px solid var(--line); }
+    .cart-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .cart-count { font-size: 12px; font-weight: 400; background: #f0f4f1; padding: 4px 10px; border-radius: 7px; }
+    .cart-heading p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .cart-content { padding: 0 23px; }
+    .empty-state { min-height: 226px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px 0; }
+    .empty-icon { background: #f4f6f3; color: #7b9182; border-radius: 50%; width: 64px; height: 64px; display: grid; place-items: center; margin-bottom: 15px; }
+    .empty-state p { margin: 0; font-size: 15px; font-weight: 700; }
+    .empty-state small { color: var(--muted); font-size: 12px; margin-top: 5px; }
+    .cart-items { list-style: none; padding: 0; margin: 0; }
+    .cart-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 18px 0; border-bottom: 1px dashed var(--line); }
+    .item-name { display: block; font-weight: 700; font-size: 15px; }
+    .item-detail { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .item-subtotal { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .cart-summary { padding: 21px 23px 23px; background: #fafbf9; border-top: 1px solid var(--line); }
+    .total-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .total-label { font-weight: 700; font-size: 15px; }
+    .total-amount { font-size: 32px; font-weight: 700; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+    .total-amount small { font-size: 14px; font-weight: 400; letter-spacing: 0; margin-left: 4px; }
+    .clear-button { margin-top: 20px; border: 1px solid #d8dfd8; border-radius: 10px; background: #fff; color: var(--ink); width: 100%; min-height: 46px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .clear-button:hover { background: #f0f3ee; }
+    .cart-note { color: var(--muted); text-align: center; font-size: 11px; margin: 13px 0 0; }
+    footer { border-top: 1px solid var(--line); padding: 22px 0; color: var(--muted); font-size: 12px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    .footer-inner p { margin: 0; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    [hidden] { display: none !important; }
+    noscript { display: block; padding: 16px; color: #9f291b; background: var(--soft); }
+    @media (max-width: 1050px) {
+      .workspace { grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; }
+      .products { grid-template-columns: 1fr; gap: 12px; }
+      .product { display: grid; grid-template-columns: 126px minmax(0, 1fr); }
+      .product-art { height: 100%; min-height: 172px; }
+      .product-art svg { width: 100px; height: 100px; }
+      .product-info { padding: 14px 16px; display: grid; grid-template-columns: 1fr auto; column-gap: 12px; align-items: center; }
+      .category, .product-info h3 { grid-column: 1 / -1; }
+      .price { margin: 10px 0 0; font-size: 23px; }
+      .add-button { margin-top: 10px; padding: 0 12px; }
+    }
+    @media (max-width: 740px) {
+      .shell { width: calc(100% - 36px); }
+      .header-inner { min-height: 82px; }
+      .brand-name { font-size: 21px; }
+      .brand-caption { font-size: 9px; }
+      .header-label { font-size: 11px; }
+      main { padding-top: 30px; padding-bottom: 32px; }
+      .workspace { grid-template-columns: 1fr; gap: 30px; margin-top: 28px; }
+      .section-heading { margin-bottom: 14px; }
+      .product { grid-template-columns: 100px minmax(0, 1fr); }
+      .product-art svg { width: 88px; }
+      .product-number { left: 10px; }
+      .product-info { column-gap: 8px; padding: 12px; }
+      h3 { font-size: 18px; }
+      .price { font-size: 22px; }
+      .add-button { font-size: 13px; gap: 5px; padding: 0 10px; }
+      .cart-heading, .cart-summary { padding: 20px; }
+      .cart-content { padding: 0 20px; }
+      .empty-state { min-height: 190px; }
+    }
+    @media (max-width: 360px) {
+      .header-label { display: none; }
+      .product { grid-template-columns: 80px minmax(0, 1fr); }
+      .product-art svg { width: 72px; }
+      .product-info { column-gap: 4px; padding: 10px; }
+      .price { font-size: 20px; }
+      .price span { font-size: 11px; margin-left: 2px; }
+    }
+    @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="shell header-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15h20v5a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8zM3 17h3m20 0h3M12 4c-4 4 4 4 0 8m8-9c-4 4 4 4 0 8"/></svg>
+        </div>
+        <div><div class="brand-name">suki<span>.</span> mini pos</div><div class="brand-caption">อร่อยง่าย ๆ ในทุกออร์เดอร์</div></div>
+      </div>
+      <div class="header-label"><span class="status-dot" aria-hidden="true"></span>พร้อมรับออร์เดอร์</div>
+    </div>
+  </header>
+
+  <noscript>กรุณาเปิดใช้งาน JavaScript ในเบราว์เซอร์เพื่อเพิ่มสินค้าและคำนวณยอดรวม</noscript>
+
+  <main class="shell">
+    <p class="eyebrow">อิ่มอร่อย เริ่มที่นี่</p>
+    <h1>รับออร์เดอร์มื้อนี้</h1>
+    <p class="intro">เลือกเมนูที่ต้องการ แล้วตรวจสอบยอดรวมในตะกร้าได้เลย</p>
+
+    <div class="workspace">
+      <section aria-labelledby="menu-heading">
+        <div class="section-heading"><h2 id="menu-heading">เมนูของเรา</h2><span class="menu-count">ทั้งหมด 3 เมนู</span></div>
+        <div class="products">
+          <article class="product">
+            <div class="product-art" aria-hidden="true">
+              <span class="product-number">01</span>
+              <svg viewBox="0 0 140 120" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="70" cy="99" rx="43" ry="6" fill="#efdcd0"/>
+                <path d="M27 55h86c-3 27-17 42-43 42S30 82 27 55Z" fill="#fffaf5" stroke="#b8775b" stroke-width="2"/>
+                <ellipse cx="70" cy="55" rx="43" ry="15" fill="#e7c19d" stroke="#b8775b" stroke-width="2"/>
+                <path d="m40 51 5-22 10 7 8-10 9 21" fill="#91a57a" stroke="#697f52" stroke-width="2"/>
+                <path d="M68 46c0-12 9-18 19-13 10-1 18 9 12 18l-7 9-24-6Z" fill="#e5a497" stroke="#b8775b" stroke-width="2"/>
+                <path d="m77 42 12 6m-15 0 12 6" stroke="#fff2e9" stroke-width="3"/>
+                <path d="m38 61 8-9 10 3m34 10 11-9M59 16c-5 7 5 8 0 15m15-19c-5 7 5 8 0 15" stroke="#b8775b" stroke-width="2"/>
+                <path d="M39 77c6 9 16 13 27 14" stroke="#e0b99f" stroke-width="2"/>
+              </svg>
+            </div>
+            <div class="product-info">
+              <p class="category">ชุดสุกี้</p><h3>ชุดหมู</h3>
+              <p class="price">199 <span>บาท</span></p>
+              <button type="button" class="add-button" data-product="pork" aria-label="เพิ่มชุดหมู 1 ชุด"><span class="plus" aria-hidden="true">+</span> เพิ่มลงตะกร้า</button>
+            </div>
+          </article>
+          <article class="product">
+            <div class="product-art beef" aria-hidden="true">
+              <span class="product-number">02</span>
+              <svg viewBox="0 0 140 120" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="70" cy="99" rx="43" ry="6" fill="#e5decb"/>
+                <path d="M27 55h86c-3 27-17 42-43 42S30 82 27 55Z" fill="#fffdf5" stroke="#8f7951" stroke-width="2"/>
+                <ellipse cx="70" cy="55" rx="43" ry="15" fill="#d8b88b" stroke="#8f7951" stroke-width="2"/>
+                <path d="m39 50 5-20 9 6 8-10 8 20" fill="#91a57a" stroke="#697f52" stroke-width="2"/>
+                <path d="M66 49c-5-10 4-21 16-19 13-2 24 8 19 18-5 11-20 15-35 1Z" fill="#ba7263" stroke="#8f5142" stroke-width="2"/>
+                <path d="m74 36 5 6-2 9m5-15 5 8 8-3m-8 3 2 9" stroke="#f7d9c3" stroke-width="2"/>
+                <path d="m38 61 8-9 10 3m34 10 11-9M59 16c-5 7 5 8 0 15m15-19c-5 7 5 8 0 15" stroke="#8f7951" stroke-width="2"/>
+                <path d="M39 77c6 9 16 13 27 14" stroke="#d7c8a8" stroke-width="2"/>
+              </svg>
+            </div>
+            <div class="product-info">
+              <p class="category">ชุดสุกี้</p><h3>ชุดเนื้อ</h3>
+              <p class="price">249 <span>บาท</span></p>
+              <button type="button" class="add-button" data-product="beef" aria-label="เพิ่มชุดเนื้อ 1 ชุด"><span class="plus" aria-hidden="true">+</span> เพิ่มลงตะกร้า</button>
+            </div>
+          </article>
+          <article class="product">
+            <div class="product-art water" aria-hidden="true">
+              <span class="product-number">03</span>
+              <svg viewBox="0 0 140 120" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="70" cy="103" rx="28" ry="5" fill="#d6e8e3"/>
+                <path d="M60 22h20v15l9 14v45a5 5 0 0 1-5 5H56a5 5 0 0 1-5-5V51l9-14Z" fill="#f9fdfc" stroke="#6f9c92" stroke-width="2"/>
+                <rect x="58" y="16" width="24" height="10" rx="3" fill="#91b6ab" stroke="#6f9c92" stroke-width="2"/>
+                <path d="M56 56h28v37H56Z" fill="#d2e8e3"/>
+                <path d="M51 62h38v23H51Z" fill="#fffdf5" stroke="#6f9c92" stroke-width="2"/>
+                <path d="M70 66c-3 4-6 7-6 10a6 6 0 0 0 12 0c0-3-3-6-6-10Z" fill="#91b6ab"/>
+                <path d="m95 34 3-5m4 12h6M57 49l7-10" stroke="#6f9c92" stroke-width="2"/>
+              </svg>
+            </div>
+            <div class="product-info">
+              <p class="category">เครื่องดื่ม</p><h3>น้ำดื่ม</h3>
+              <p class="price">20 <span>บาท</span></p>
+              <button type="button" class="add-button" data-product="water" aria-label="เพิ่มน้ำดื่ม 1 หน่วย"><span class="plus" aria-hidden="true">+</span> เพิ่มลงตะกร้า</button>
+            </div>
+          </article>
+        </div>
+        <p class="menu-hint"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 9v5m0-9v1"/></svg>กดเพิ่มแต่ละครั้ง = 1 หน่วย · กดซ้ำเพื่อเพิ่มจำนวน</p>
+      </section>
+
+      <section class="cart" aria-labelledby="cart-heading">
+        <div class="cart-heading">
+          <div class="cart-title"><h2 id="cart-heading">ตะกร้าของคุณ</h2><span id="cart-count" class="cart-count">0 หน่วย</span></div>
+          <p>รายการสำหรับออร์เดอร์ปัจจุบัน</p>
+        </div>
+        <div class="cart-content">
+          <div id="empty-state" class="empty-state">
+            <div class="empty-icon" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 3 13h16l3-13H5Zm5 0 6-9 6 9M12 17v5m8-5v5M3 13h26"/></svg></div>
+            <p>ตะกร้ายังว่าง</p><small>เลือกเมนูอร่อย ๆ เพื่อเริ่มออร์เดอร์</small>
+          </div>
+          <ul id="cart-items" class="cart-items" aria-label="สินค้าในตะกร้า"></ul>
+        </div>
+        <div class="cart-summary">
+          <div class="total-row"><label for="cart-total" class="total-label">ยอดรวมทั้งหมด</label><div class="total-amount"><output id="cart-total" aria-live="off">0</output><small>บาท</small></div></div>
+          <button id="clear-cart" type="button" class="clear-button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg>ล้างตะกร้า</button>
+          <p class="cart-note">ล้างตะกร้าเพื่อเริ่มออร์เดอร์ใหม่</p>
+        </div>
+      </section>
+    </div>
+    <p id="announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+  </main>
+
+  <footer><div class="shell footer-inner"><p>Suki Mini POS · มื้ออร่อยที่ลงตัว</p><p>เมื่อโหลดหน้าใหม่ ตะกร้าจะเริ่มต้นที่ 0 บาท</p></div></footer>
+
+  <script>
+    'use strict';
+
+    // Keep the current order in memory only; reloading starts a new order.
+    const products = [
+      { id: 'pork', name: 'ชุดหมู', price: 199 },
+      { id: 'beef', name: 'ชุดเนื้อ', price: 249 },
+      { id: 'water', name: 'น้ำดื่ม', price: 20 }
+    ];
+    const cart = new Map();
+    const cartItems = document.getElementById('cart-items');
+    const emptyState = document.getElementById('empty-state');
+    const cartCount = document.getElementById('cart-count');
+    const cartTotal = document.getElementById('cart-total');
+    const announcement = document.getElementById('announcement');
+    const numberFormat = new Intl.NumberFormat('th-TH');
+
+    function renderCart() {
+      const fragment = document.createDocumentFragment();
+      let total = 0;
+      let count = 0;
+
+      for (const product of products) {
+        const quantity = cart.get(product.id) || 0;
+        if (quantity === 0) continue;
+
+        const subtotal = product.price * quantity;
+        total += subtotal;
+        count += quantity;
+
+        const row = document.createElement('li');
+        row.className = 'cart-item';
+        row.dataset.product = product.id;
+        const info = document.createElement('div');
+        const name = document.createElement('span');
+        name.className = 'item-name';
+        name.textContent = product.name;
+        const detail = document.createElement('span');
+        detail.className = 'item-detail';
+        detail.textContent = `${numberFormat.format(product.price)} บาท/หน่วย × ${numberFormat.format(quantity)} หน่วย`;
+        const amount = document.createElement('span');
+        amount.className = 'item-subtotal';
+        amount.textContent = `${numberFormat.format(subtotal)} บาท`;
+        info.append(name, detail);
+        row.append(info, amount);
+        fragment.append(row);
+      }
+
+      cartItems.replaceChildren(fragment);
+      emptyState.hidden = count > 0;
+      cartCount.textContent = `${numberFormat.format(count)} หน่วย`;
+      cartTotal.textContent = numberFormat.format(total);
+      return total;
+    }
+
+    document.querySelectorAll('.add-button').forEach(button => {
+      button.addEventListener('click', () => {
+        const product = products.find(item => item.id === button.dataset.product);
+        cart.set(product.id, (cart.get(product.id) || 0) + 1);
+        const total = renderCart();
+        announcement.textContent = `เพิ่ม${product.name}แล้ว จำนวน ${cart.get(product.id)} หน่วย ยอดรวม ${numberFormat.format(total)} บาท`;
+      });
+    });
+
+    document.getElementById('clear-cart').addEventListener('click', () => {
+      cart.clear();
+      renderCart();
+      announcement.textContent = 'ล้างตะกร้าแล้ว ยอดรวม 0 บาท พร้อมเริ่มออร์เดอร์ใหม่';
+    });
+
+    renderCart();
+  </script>
+</body>
+</html>
